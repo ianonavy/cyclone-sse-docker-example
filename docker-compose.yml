@@ -1,0 +1,38 @@
+version: '3'
+services:
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile-nginx
+    ports:
+      - "80:80"
+    links:
+      - "cyclone"
+      - "web"
+
+  db:
+    image: mysql
+    environment:
+      MYSQL_DATABASE: docker-demo
+      MYSQL_ROOT_PASSWORD: root
+
+  redis:
+    image: redis
+
+  cyclone:
+    command: twistd --pidfile /tmp/cyclone.pid -n cyclone-sse -l 0.0.0.0 --redis-host=redis --broker=redis
+    build: .
+    links:
+      - redis
+    volumes:
+      - .:/srv
+
+  web:
+    command: python app.py
+    build: .
+    links:
+      - db
+      - redis
+    volumes:
+      - .:/srv
