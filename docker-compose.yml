@@ -21,7 +21,7 @@ services:
     image: redis
 
   cyclone:
-    command: twistd --pidfile /tmp/cyclone.pid -n cyclone-sse -l 0.0.0.0 --redis-host=redis --broker=redis
+    command: ./run_cyclone.sh
     build: .
     links:
       - redis
