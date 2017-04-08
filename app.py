@@ -1,10 +1,19 @@
 import datetime
-import redis
-from flask import Flask, render_template
-
 import pymysql
+import redis
+from flask import Flask, render_template, request, redirect, url_for
+
 
 app = Flask(__name__)
+
+
+def update_clients_with_current_db_time():
+    with pymysql.connect(host='db', user='root', password='root') as cursor:
+        cursor.execute('select current_timestamp()')
+        (data,) = cursor.fetchone()
+
+    redis_conn = redis.Redis('redis')
+    redis_conn.publish('channel', data)
 
 
 @app.route('/')
@@ -12,15 +21,11 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/push')
+@app.route('/push', methods=["POST"])
 def push():
-    with pymysql.connect(host='db', user='root', password='root') as cur:
-        cur.execute('select current_timestamp()')
-        data = cur.fetchall()[0][0]
-
-    redis_conn = redis.Redis('redis')
-    redis_conn.publish('channel', data)
-    return 'OK'
+    if request.method == 'POST':
+        update_clients_with_current_db_time()
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':

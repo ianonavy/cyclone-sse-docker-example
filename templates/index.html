@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,15 +5,24 @@
     <title>Document</title>
 </head>
 <body>
-<p id="message">hi</p>
+	<p>The button was last pushed on: <span id="message">null</span></p>
 
-<script>
-var source = new EventSource("/channel?channels=channel");
-source.addEventListener("message", function (e) {
-  var message = document.getElementById("message");
-  message.textContent = e.data;
-});
-</script>
+	<button id="button">Push Me!</button>
 
+	<script>
+	var source = new EventSource("/channel?channels=channel");
+	source.addEventListener("message", function (e) {
+		var message = document.getElementById("message");
+		message.textContent = e.data;
+	});
+
+	var button = document.getElementById("button");
+	button.addEventListener("click", function (e) {
+		var xhr = new XMLHttpRequest();
+		xhr.open('POST', '/push');
+		xhr.send(null);
+	});
+
+	</script>
 </body>
 </html>
